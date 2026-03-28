@@ -710,7 +710,7 @@ travel_cost_calculator() {
 # Approval: move spot from pending_spots.txt → spots.txt atomically
 admin_approve_spots() {
     echo ""
-    echo -e "${MAGENTA}${BOLD}=== Pending Spots — Approve or Dismiss ===${RESET}"
+    echo -e "${MAGENTA}${BOLD}=== Pending Spots — Approve or Disapprove ===${RESET}"
 
     local count=0
     while IFS='|' read -r id name city country description season submitted_by; do
@@ -723,46 +723,91 @@ admin_approve_spots() {
         echo -e "${YELLOW}  No pending spots.${RESET}"; return
     fi
 
-    read -p "  Enter Pending ID to APPROVE (0 to cancel): " pending_id
-    [ "$pending_id" = "0" ] && return
+    echo ""
+    echo -e "  ${BOLD}A)${RESET} Approve a spot"
+    echo -e "  ${BOLD}D)${RESET} Disapprove (dismiss) a spot"
+    echo -e "  ${BOLD}0)${RESET} Cancel"
+    echo ""
+    read -p "  Choose action (A/D/0): " action
 
-    # Find the pending entry
-    local spot_line
-    spot_line=$(grep "^${pending_id}|" "$PENDING_SPOTS_FILE")
-    if [ -z "$spot_line" ]; then
-        echo -e "${RED}  ✘ Pending ID '${pending_id}' not found.${RESET}"; return
-    fi
+    case "${action^^}" in
 
-    IFS='|' read -r pid name city country description season submitted_by <<< "$spot_line"
+        A)  read -p "  Enter Pending ID to APPROVE: " pending_id
 
-    local new_id
-    new_id=$(next_id "$SPOTS_FILE")
-    local new_entry="${new_id}|${name}|${city}|${country}|${description}|${season}"
+            local spot_line
+            spot_line=$(grep "^${pending_id}|" "$PENDING_SPOTS_FILE")
+            if [ -z "$spot_line" ]; then
+                echo -e "${RED}  ✘ Pending ID '${pending_id}' not found.${RESET}"; return
+            fi
 
-    # ATOMIC WRITE: append first, verify, then delete source
-    echo "$new_entry" >> "$SPOTS_FILE"
+            IFS='|' read -r pid name city country description season submitted_by <<< "$spot_line"
 
-    if grep -q "^${new_id}|" "$SPOTS_FILE"; then
-        # Write confirmed — now remove from pending using sed
-        sed -i "/^${pending_id}|/d" "$PENDING_SPOTS_FILE"
-        log_action "$CURRENT_USER" "APPROVE_SPOT" "NewID:${new_id}(${name}),By:${submitted_by}"
-        echo -e "${GREEN}  ✔ '${name}' approved and added as Spot ID ${new_id}.${RESET}"
-    else
-        echo -e "${RED}  ✘ Write verification failed. Approval aborted safely.${RESET}"
-    fi
+            local new_id
+            new_id=$(next_id "$SPOTS_FILE")
+            local new_entry="${new_id}|${name}|${city}|${country}|${description}|${season}"
+
+            echo "$new_entry" >> "$SPOTS_FILE"
+
+            if grep -q "^${new_id}|" "$SPOTS_FILE"; then
+                sed -i "/^${pending_id}|/d" "$PENDING_SPOTS_FILE"
+                log_action "$CURRENT_USER" "APPROVE_SPOT" \
+                    "NewID:${new_id}(${name}),By:${submitted_by}"
+                echo -e "${GREEN}  ✔ '${name}' approved and added as Spot ID ${new_id}.${RESET}"
+            else
+                echo -e "${RED}  ✘ Write verification failed. Approval aborted safely.${RESET}"
+            fi
+            ;;
+
+        D)  read -p "  Enter Pending ID to DISAPPROVE: " pending_id
+
+            local spot_line
+            spot_line=$(grep "^${pending_id}|" "$PENDING_SPOTS_FILE")
+            if [ -z "$spot_line" ]; then
+                echo -e "${RED}  ✘ Pending ID '${pending_id}' not found.${RESET}"; return
+            fi
+
+            IFS='|' read -r pid name city country description season submitted_by <<< "$spot_line"
+
+            echo ""
+            echo -e "${YELLOW}  Spot     : ${name}  (${city}, ${country})${RESET}"
+            echo -e "${YELLOW}  Season   : ${season}${RESET}"
+            echo -e "${YELLOW}  Submitted by: ${submitted_by}${RESET}"
+            echo ""
+            read -p "  Confirm disapprove? (yes/no): " confirm
+
+            if [ "${confirm,,}" = "yes" ]; then
+                sed -i "/^${pending_id}|/d" "$PENDING_SPOTS_FILE"
+                log_action "$CURRENT_USER" "DISAPPROVE_SPOT" \
+                    "PendingID:${pending_id}(${name}),By:${submitted_by}"
+                echo -e "${GREEN}  ✔ Pending spot '${name}' dismissed and removed.${RESET}"
+            else
+                echo -e "${YELLOW}  Cancelled.${RESET}"
+            fi
+            ;;
+
+        0)  return ;;
+        *)  echo -e "${RED}  ✘ Invalid choice.${RESET}" ;;
+    esac
 }
 
 # Approval: move hotel from pending_hotels.txt → hotels.txt atomically
 admin_approve_hotels() {
     echo ""
-    echo -e "${MAGENTA}${BOLD}=== Pending Hotels — Approve or Dismiss ===${RESET}"
+    echo -e "${MAGENTA}${BOLD}=== Pending Hotels — Approve or Disapprove ===${RESET}"
 
+    # Check if the spot the hotel belongs to still exists
+    # and warn if it doesn't (shouldn't happen now, but good safety net)
     local count=0
     while IFS='|' read -r id spot_id hotel_name address price submitted_by; do
         [ "$id" = "HotelID" ] && continue
         local sname
-        sname=$(get_spot_name "$spot_id")
-        echo -e "  ${BOLD}[${id}]${RESET}  ${hotel_name}  near ${sname} (SpotID:${spot_id})  ৳${price}/night  — by ${YELLOW}${submitted_by}${RESET}"
+        if spot_exists "$spot_id"; then
+            sname=$(get_spot_name "$spot_id")
+            echo -e "  ${BOLD}[${id}]${RESET}  ${hotel_name}  near ${sname} (SpotID:${spot_id})  ৳${price}/night  — by ${YELLOW}${submitted_by}${RESET}"
+        else
+            # Spot was deleted but pending entry survived (edge case guard)
+            echo -e "  ${BOLD}[${id}]${RESET}  ${hotel_name}  ${RED}⚠ SpotID:${spot_id} no longer exists${RESET}  — by ${YELLOW}${submitted_by}${RESET}"
+        fi
         ((count++))
     done < "$PENDING_HOTELS_FILE"
 
@@ -770,30 +815,82 @@ admin_approve_hotels() {
         echo -e "${YELLOW}  No pending hotels.${RESET}"; return
     fi
 
-    read -p "  Enter Pending ID to APPROVE (0 to cancel): " pending_id
-    [ "$pending_id" = "0" ] && return
+    echo ""
+    echo -e "  ${BOLD}A)${RESET} Approve a hotel"
+    echo -e "  ${BOLD}D)${RESET} Disapprove (dismiss) a hotel"
+    echo -e "  ${BOLD}0)${RESET} Cancel"
+    echo ""
+    read -p "  Choose action (A/D/0): " action
 
-    local hotel_line
-    hotel_line=$(grep "^${pending_id}|" "$PENDING_HOTELS_FILE")
-    if [ -z "$hotel_line" ]; then
-        echo -e "${RED}  ✘ Pending ID '${pending_id}' not found.${RESET}"; return
-    fi
+    case "${action^^}" in   # ^^ converts input to uppercase
 
-    IFS='|' read -r pid spot_id hotel_name address price submitted_by <<< "$hotel_line"
+        A)  # ── APPROVE ──────────────────────────────────────────
+            read -p "  Enter Pending ID to APPROVE: " pending_id
 
-    local new_id
-    new_id=$(next_id "$HOTELS_FILE")
-    local new_entry="${new_id}|${spot_id}|${hotel_name}|${address}|${price}"
+            local hotel_line
+            hotel_line=$(grep "^${pending_id}|" "$PENDING_HOTELS_FILE")
+            if [ -z "$hotel_line" ]; then
+                echo -e "${RED}  ✘ Pending ID '${pending_id}' not found.${RESET}"; return
+            fi
 
-    echo "$new_entry" >> "$HOTELS_FILE"
+            IFS='|' read -r pid spot_id hotel_name address price submitted_by <<< "$hotel_line"
 
-    if grep -q "^${new_id}|" "$HOTELS_FILE"; then
-        sed -i "/^${pending_id}|/d" "$PENDING_HOTELS_FILE"
-        log_action "$CURRENT_USER" "APPROVE_HOTEL" "NewID:${new_id}(${hotel_name}),By:${submitted_by}"
-        echo -e "${GREEN}  ✔ '${hotel_name}' approved and added as Hotel ID ${new_id}.${RESET}"
-    else
-        echo -e "${RED}  ✘ Write verification failed. Approval aborted safely.${RESET}"
-    fi
+            # Guard: make sure the spot still exists before approving
+            if ! spot_exists "$spot_id"; then
+                echo -e "${RED}  ✘ Cannot approve: SpotID '${spot_id}' no longer exists.${RESET}"
+                echo -e "${YELLOW}  Tip: Use Disapprove to clean up this orphaned entry.${RESET}"
+                return
+            fi
+
+            local new_id
+            new_id=$(next_id "$HOTELS_FILE")
+            local new_entry="${new_id}|${spot_id}|${hotel_name}|${address}|${price}"
+
+            # Atomic write: append first, verify, then delete from pending
+            echo "$new_entry" >> "$HOTELS_FILE"
+
+            if grep -q "^${new_id}|" "$HOTELS_FILE"; then
+                sed -i "/^${pending_id}|/d" "$PENDING_HOTELS_FILE"
+                log_action "$CURRENT_USER" "APPROVE_HOTEL" \
+                    "NewID:${new_id}(${hotel_name}),SpotID:${spot_id},By:${submitted_by}"
+                echo -e "${GREEN}  ✔ '${hotel_name}' approved and added as Hotel ID ${new_id}.${RESET}"
+            else
+                echo -e "${RED}  ✘ Write verification failed. Approval aborted safely.${RESET}"
+            fi
+            ;;
+
+        D)  # ── DISAPPROVE ──────────────────────────────────────
+            read -p "  Enter Pending ID to DISAPPROVE: " pending_id
+
+            local hotel_line
+            hotel_line=$(grep "^${pending_id}|" "$PENDING_HOTELS_FILE")
+            if [ -z "$hotel_line" ]; then
+                echo -e "${RED}  ✘ Pending ID '${pending_id}' not found.${RESET}"; return
+            fi
+
+            IFS='|' read -r pid spot_id hotel_name address price submitted_by <<< "$hotel_line"
+
+            echo ""
+            echo -e "${YELLOW}  Hotel    : ${hotel_name}${RESET}"
+            echo -e "${YELLOW}  SpotID   : ${spot_id}${RESET}"
+            echo -e "${YELLOW}  Price    : ৳${price}/night${RESET}"
+            echo -e "${YELLOW}  Submitted by: ${submitted_by}${RESET}"
+            echo ""
+            read -p "  Confirm disapprove? (yes/no): " confirm
+
+            if [ "${confirm,,}" = "yes" ]; then    # ,, converts to lowercase
+                sed -i "/^${pending_id}|/d" "$PENDING_HOTELS_FILE"
+                log_action "$CURRENT_USER" "DISAPPROVE_HOTEL" \
+                    "PendingID:${pending_id}(${hotel_name}),SpotID:${spot_id},By:${submitted_by}"
+                echo -e "${GREEN}  ✔ Pending hotel '${hotel_name}' dismissed and removed.${RESET}"
+            else
+                echo -e "${YELLOW}  Cancelled.${RESET}"
+            fi
+            ;;
+
+        0)  return ;;
+        *)  echo -e "${RED}  ✘ Invalid choice.${RESET}" ;;
+    esac
 }
 
 # Cascade delete: removes a spot AND all its linked hotels + ratings
@@ -820,18 +917,25 @@ admin_delete_spot() {
     [ "$confirm" != "YES" ] && echo -e "${YELLOW}  Cancelled.${RESET}" && return
 
     # CASCADE DELETE using sed -i (in-place deletion)
-    # 1. Delete the spot row: SpotID|...
+    # 1. Delete the spot row
     sed -i "/^${spot_id}|/d" "$SPOTS_FILE"
 
-    # 2. Delete all hotels for this spot: HotelID|SpotID|...
-    #    Pattern: ^any-chars|SpotID|
+    # 2. Delete all live hotels for this spot
     sed -i "/^[^|]*|${spot_id}|/d" "$HOTELS_FILE"
 
-    # 3. Delete all ratings: SpotID|Username|...
+    # 3. Delete all ratings for this spot
     sed -i "/^${spot_id}|/d" "$RATINGS_FILE"
 
-    log_action "$CURRENT_USER" "CASCADE_DELETE" "SpotID:${spot_id}(${spot_name})"
+    # 4. Delete all PENDING hotels for this spot
+    #    Prevents orphaned pending entries attaching to a future recycled SpotID
+    local pending_hotel_count
+    pending_hotel_count=$(grep -c "^[^|]*|${spot_id}|" "$PENDING_HOTELS_FILE" 2>/dev/null || echo 0)
+    sed -i "/^[^|]*|${spot_id}|/d" "$PENDING_HOTELS_FILE"
+
+    log_action "$CURRENT_USER" "CASCADE_DELETE" "SpotID:${spot_id}(${spot_name}),PendingHotelsRemoved:${pending_hotel_count}"
     echo -e "${GREEN}  ✔ Spot '${spot_name}' and all linked data permanently deleted.${RESET}"
+    [ "$pending_hotel_count" -gt 0 ] && \
+        echo -e "${YELLOW}  ⚠  Also removed ${pending_hotel_count} pending hotel submission(s) for this spot.${RESET}"
 }
 
 # View all registered users (passwords hidden — only hashes stored)
