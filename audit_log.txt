@@ -1,0 +1,10 @@
+Timestamp|Actor|Action|TargetID
+2026-03-28 23:19:05|admin|LOGIN|Role:Admin
+2026-03-28 23:19:32|admin|LOGOUT|-
+2026-03-28 23:20:29|system|SIGNUP|UserID:2(testuser)
+2026-03-28 23:20:43|testuser|LOGIN|Role:User
+2026-03-28 23:23:33|testuser|SUBMIT_SPOT|PendingID:1(Alikodom circuit)
+2026-03-28 23:23:51|testuser|LOGOUT|-
+2026-03-28 23:24:01|admin|LOGIN|Role:Admin
+2026-03-28 23:24:18|admin|APPROVE_SPOT|NewID:5(Alikodom circuit),By:testuser
+2026-03-28 23:24:55|admin|LOGOUT|-

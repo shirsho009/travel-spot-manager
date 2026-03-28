@@ -1,5 +1,6 @@
-ID|Name|City|Country|Description
-1|Cox's Bazar|Cox's Bazar|Bangladesh|Longest natural sea beach in the world. 120km stretch of golden sand.
-2|Sajek Valley|Rangamati|Bangladesh|Beautiful hill-top valley with panoramic views of green hills.
-3|Sundarbans|Khulna|Bangladesh|UNESCO World Heritage mangrove forest. Home to Royal Bengal Tiger.
-4|Kuakata|Barisal|Bangladesh|Sunrise and sunset beach on the same spot.
+SpotID|Name|City|Country|Description|BestSeason
+1|Cox's Bazar|Cox's Bazar|Bangladesh|Longest natural sea beach in the world. 120km of golden sand.|Winter
+2|Sajek Valley|Rangamati|Bangladesh|Beautiful hill-top valley with panoramic views of green hills.|Spring
+3|Sundarbans|Khulna|Bangladesh|UNESCO World Heritage mangrove forest. Home to Royal Bengal Tiger.|Winter
+4|Kuakata|Barisal|Bangladesh|Sunrise and sunset beach on the same spot.|Winter
+5|Alikodom circuit|Bandarban|Bangladesh|Wild adventure where you get to summit high peaks like Kirstaung, Rungrang, Liblihung; and enjoy waterfalls like mighty Saingpra, Palongkhiyang, Ladmerakh, Jamrum, Thankoyain, Kratong. GreGreat experience for physically strong amateur travelers.|Monsoon

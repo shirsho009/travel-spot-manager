@@ -1,4 +1,4 @@
-SpotID|UserName|Rating|Comment
+SpotID|Username|Rating|Comment
 1|shimanto|4|Beautiful, but crowded during holidays
 1|anika|5|Very clean and scenic. Perfect family trip!
 2|tahmid|3|Need better roads to reach the top
