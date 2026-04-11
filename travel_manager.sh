@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ============================================================
-#  Travel Spot Management System v2.0
+#  Travel Spot Management System 
 #  Student: SHIMANTO SHIRSHO (2204009)
 #  Course : Operating Systems (CSE)
 #  Features: RBAC, Auth, Approval Workflow, Audit Log
@@ -234,9 +234,9 @@ splash_screen() {
     while true; do
         echo ""
         echo -e "${BOLD}${CYAN}╔══════════════════════════════════════════════════╗${RESET}"
-        echo -e "${BOLD}${CYAN}║     🌍  Travel Spot Management System  v2.0      ║${RESET}"
+        echo -e "${BOLD}${CYAN}║         🌍  Travel Spot Management System        ║${RESET}"
         echo -e "${BOLD}${CYAN}╠══════════════════════════════════════════════════╣${RESET}"
-        echo -e "${BOLD}${CYAN}║         1) Login    2) Sign Up    3) Exit         ║${RESET}"
+        echo -e "${BOLD}${CYAN}║         1) Login    2) Sign Up    3) Exit        ║${RESET}"
         echo -e "${BOLD}${CYAN}╚══════════════════════════════════════════════════╝${RESET}"
         echo ""
         read -p "  Choose: " splash_choice
@@ -317,6 +317,7 @@ search_by_season() {
 
 list_ratings_for_spot() {
     echo ""
+    list_spots
     read -p "  Enter Spot ID: " spot_id
     if ! spot_exists "$spot_id"; then
         echo -e "${RED}  ✘ Spot ID '${spot_id}' not found.${RESET}"; return
@@ -341,6 +342,7 @@ list_ratings_for_spot() {
 
 show_full_summary() {
     echo ""
+    list_spots
     read -p "  Enter Spot ID: " spot_id
     if ! spot_exists "$spot_id"; then
         echo -e "${RED}  ✘ Spot ID '${spot_id}' not found.${RESET}"; return
@@ -470,12 +472,12 @@ export_summary_report() {
     echo ""
     echo -e "${CYAN}Generating full summary report...${RESET}"
     {
-        echo "============================================================"
-        echo "  TRAVEL SPOT MANAGEMENT SYSTEM v2.0 — SUMMARY REPORT"
+        echo "======================================================"
+        echo "  TRAVEL SPOT MANAGEMENT SYSTEM — SUMMARY REPORT"
         echo "  Student  : SHIMANTO SHIRSHO (2204009)"
         echo "  Generated: $(date '+%Y-%m-%d %H:%M:%S')"
         echo "  By       : ${CURRENT_USER}"
-        echo "============================================================"
+        echo "======================================================"
         echo ""
 
         while IFS='|' read -r id name city country description season; do
