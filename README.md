@@ -35,9 +35,10 @@ On first run, all database files are automatically created with sample data.
 You do not need to create any files manually.
 
 ### Default Admin Login
+```
 Username : admin
 Password : admin123
-
+```
 
 > Change this password after first login by editing users.txt directly,
 > or ask your system admin to update it.
