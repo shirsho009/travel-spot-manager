@@ -1,12 +1,12 @@
-```markdown
+
 # 🌍 Travel Spot Management System
 
 A fully interactive, terminal-based travel management application built in pure Bash.
 Manage travel destinations, hotels, bookings, ratings, and user accounts — all through
 a secure, role-based interface running entirely on text files.
 
-**Student:** SHIMANTO SHIRSHO (2204009)
-**Course:** Operating Systems, CSE Department, CUET
+**Student:** SHIMANTO SHIRSHO (ID: 2204009) <br>
+**Course:** CSE-336: Operating Systems, Dept of CSE, CUET
 
 ---
 
@@ -350,4 +350,3 @@ chmod +x travel_manager.sh lib/init.sh lib/auth.sh lib/shared.sh lib/user.sh lib
 ```
 
 Everything works identically on WSL as it does on Mac/OrbStack.
-```
