@@ -1,2 +1,2 @@
-BookingID|Username|HotelID|HotelName|SpotID|Nights|Status|Timestamp
-1|arif|6|Palongkhiyang jumghor|5|2|Approved|2026-04-18 14:20:24
+BookingID|Username|HotelID|HotelName|SpotID|Rooms|Nights|Status|Timestamp
+1|arif|6|Palongkhiyang Jumghor|5|1|2|Approved|2026-04-19 02:44:33

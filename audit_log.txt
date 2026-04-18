@@ -38,3 +38,23 @@ Timestamp|Actor|Action|TargetID
 2026-04-18 14:22:14|arif|LOGIN|Role:User
 2026-04-18 14:23:02|arif|COST_CALC|Spot:5,Hotel:6,Nights:2,Total:400
 2026-04-18 14:23:25|arif|LOGOUT|-
+2026-04-19 02:40:22|admin|LOGIN|Role:Admin
+2026-04-19 02:40:39|admin|LOGOUT|-
+2026-04-19 02:40:45|hotelmanager|LOGIN|Role:HotelManager
+2026-04-19 02:40:48|hotelmanager|VIEW_REVENUE|Total:0
+2026-04-19 02:41:37|hotelmanager|LOGOUT|-
+2026-04-19 02:42:21|hotelmanager|LOGIN|Role:HotelManager
+2026-04-19 02:42:29|hotelmanager|LOGOUT|-
+2026-04-19 02:43:03|hotelmanager|LOGIN|Role:HotelManager
+2026-04-19 02:43:45|hotelmanager|SUBMIT_HOTEL|PendingID:3(Palongkhiyang Jumghor),SpotID:5
+2026-04-19 02:43:58|hotelmanager|LOGOUT|-
+2026-04-19 02:44:03|admin|LOGIN|Role:Admin
+2026-04-19 02:44:13|admin|APPROVE_HOTEL|NewID:6(Palongkhiyang Jumghor),Manager:hotelmanager
+2026-04-19 02:44:16|admin|LOGOUT|-
+2026-04-19 02:44:21|arif|LOGIN|Role:User
+2026-04-19 02:44:33|arif|BOOK_HOTEL|BookingID:1,HotelID:6(Palongkhiyang Jumghor),Rooms:1,Nights:2,Total:400
+2026-04-19 02:44:38|arif|LOGOUT|-
+2026-04-19 02:44:44|hotelmanager|LOGIN|Role:HotelManager
+2026-04-19 02:45:03|hotelmanager|APPROVE_BOOKING|BookingID:1,Guest:arif,Rooms:1,HotelID:6
+2026-04-19 02:45:06|hotelmanager|VIEW_REVENUE|Total:400
+2026-04-19 02:45:20|hotelmanager|LOGOUT|-
