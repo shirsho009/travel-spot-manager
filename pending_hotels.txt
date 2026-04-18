@@ -1,1 +1,2 @@
-HotelID|SpotID|HotelName|Address|PricePerNight|SubmittedBy
+HotelID|SpotID|HotelName|Address|PricePerNight|TotalRooms|SubmittedBy
+2|3|Royal Resort|Kuyar par, Sundarban|3000|10|hotelmanager

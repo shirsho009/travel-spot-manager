@@ -1,6 +1,7 @@
-HotelID|SpotID|HotelName|Address|PricePerNight
-1|1|Sea View Resort|Near Beach Road, Cox's Bazar|5000
-2|1|Beach Paradise Hotel|Main Beach Area, Cox's Bazar|6500
-3|2|Hill View Inn|Top of Sajek Hill, Rangamati|6000
-4|3|Sundarban Eco Lodge|Near Jetty Area, Khulna|4000
-5|4|Kuakata Sea Pearl Resort|Beachfront, Kuakata|4500
+HotelID|SpotID|HotelName|Address|PricePerNight|TotalRooms|AvailableRooms|ManagerUsername
+1|1|Sea View Resort|Near Beach Road Cox's Bazar|5000|20|20|admin
+2|1|Beach Paradise Hotel|Main Beach Area Cox's Bazar|6500|15|15|admin
+3|2|Hill View Inn|Top of Sajek Hill Rangamati|6000|10|10|admin
+4|3|Sundarban Eco Lodge|Near Jetty Area Khulna|4000|12|12|admin
+5|4|Kuakata Sea Pearl Resort|Beachfront Kuakata|4500|18|18|admin
+6|5|Palongkhiyang jumghor|Palongkhiyang, Twine canal, Alikadam|200|20|19|hotelmanager
