@@ -86,9 +86,9 @@ splash_screen() {
     while true; do
         echo ""
         echo -e "${BOLD}${CYAN}╔══════════════════════════════════════════════════╗${RESET}"
-        echo -e "${BOLD}${CYAN}║     🌍  Travel Spot Management System            ║${RESET}"
+        echo -e "${BOLD}${CYAN}║      🌍 Travel Spot Management System            ║${RESET}"
         echo -e "${BOLD}${CYAN}╠══════════════════════════════════════════════════╣${RESET}"
-        echo -e "${BOLD}${CYAN}║         1) Login    2) Sign Up    3) Exit         ║${RESET}"
+        echo -e "${BOLD}${CYAN}║         1) Login    2) Sign Up    3) Exit        ║${RESET}"
         echo -e "${BOLD}${CYAN}╚══════════════════════════════════════════════════╝${RESET}"
         echo ""
         read -p "  Choose: " splash_choice

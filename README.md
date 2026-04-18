@@ -1,10 +1,11 @@
+```markdown
 # 🌍 Travel Spot Management System
 
 A fully interactive, terminal-based travel management application built in pure Bash.
-Manage travel destinations, hotels, ratings, and users — all through a secure,
-role-based interface running entirely on text files.
+Manage travel destinations, hotels, bookings, ratings, and user accounts — all through
+a secure, role-based interface running entirely on text files.
 
-**Student:** SHIMANTO SHIRSHO (2204009)  
+**Student:** SHIMANTO SHIRSHO (2204009)
 **Course:** Operating Systems, CSE Department, CUET
 
 ---
@@ -24,8 +25,8 @@ role-based interface running entirely on text files.
 git clone https://github.com/shirsho009/travel-spot-manager.git
 cd travel-spot-manager
 
-# Make the script executable (first time only)
-chmod +x travel_manager.sh
+# Make all scripts executable (first time only)
+chmod +x travel_manager.sh lib/init.sh lib/auth.sh lib/shared.sh lib/user.sh lib/hotel_manager.sh lib/admin.sh
 
 # Run
 ./travel_manager.sh
@@ -35,26 +36,44 @@ On first run, all database files are automatically created with sample data.
 You do not need to create any files manually.
 
 ### Default Admin Login
+
 ```
 Username : admin
 Password : admin123
 ```
 
-> Change this password after first login by editing users.txt directly,
-> or ask your system admin to update it.
+---
+
+## Project Structure
+
+```
+travel-spot-manager/
+├── travel_manager.sh        ← entry point, run this
+└── lib/
+    ├── init.sh              ← global variables, helpers, database initializer
+    ├── auth.sh              ← signup, login, logout, splash screen
+    ├── shared.sh            ← features shared across all roles
+    ├── user.sh              ← user panel and features
+    ├── hotel_manager.sh     ← hotel manager panel and features
+    └── admin.sh             ← admin panel and features
+```
 
 ---
 
 ## How It Works
 
 When you run the program, you land on a **splash screen** with three options:
-1. Login
-2. Sign Up
-3. Exit
 
-After logging in, the system routes you to one of two panels depending on your role:
-- **User Panel** — for regular users who browse and submit content
-- **Admin Panel** — for administrators who manage and approve content
+```
+1) Login
+2) Sign Up
+3) Exit
+```
+
+After logging in, the system routes you to a panel based on your role:
+- **User Panel** — browse spots, book hotels, leave ratings
+- **Hotel Manager Panel** — manage hotels, handle bookings, view revenue
+- **Admin Panel** — approve content, manage the database, view system activity
 
 ---
 
@@ -65,8 +84,8 @@ Select **Sign Up** from the splash screen.
 - Choose a unique username
 - Enter a password (hidden while typing)
 - Confirm your password
+- Select your account type: **Regular User** or **Hotel Manager**
 
-All new accounts are assigned the **User** role automatically.
 Passwords are never stored as plain text — they are hashed using SHA-256 before saving.
 
 ---
@@ -74,67 +93,121 @@ Passwords are never stored as plain text — they are hashed using SHA-256 befor
 ## User Panel
 
 ### 1. List All Spots
-Displays every approved travel spot in the database with its location and best season to visit.
+Displays every approved travel spot with its location and best season to visit.
 
 ### 2. Search by City
-Type part of a city name (case-insensitive). Shows all spots in matching cities.
-Example: typing `cox` will find Cox's Bazar.
+Type part of a city name (case-insensitive). Example: typing `cox` finds Cox's Bazar.
 
 ### 3. Search by Country
-Type part of a country name. Shows all spots in matching countries.
+Type part of a country name. Example: `bangladesh` returns all spots in Bangladesh.
 
 ### 4. Search by Best Season
 Enter a season — `Winter`, `Summer`, `Spring`, `Monsoon`, or `Any`.
-The system returns spots whose best visiting season matches your input.
-Useful for planning trips around specific times of year.
+Returns spots whose best visiting season matches your input.
 
 ### 5. Submit a New Spot
-Submit a travel destination for admin review. Fill in:
-- Spot name
-- City
-- Country
-- Description
-- Best season to visit
-
-Your submission goes into a **pending queue** and does not appear in the live database
+Propose a new travel destination by providing its name, city, country, description,
+and best season. The submission enters a pending queue and is not visible to others
 until an admin approves it.
 
-### 6. Submit a New Hotel
-Submit a hotel near an existing spot. The system shows you the current spot list
-so you can pick the correct Spot ID. Fill in:
-- Hotel name
-- Address
-- Price per night (BDT)
-
-Like spots, hotel submissions go into a pending queue awaiting admin approval.
-
-### 7. Add Rating for a Spot
+### 6. Add Rating for a Spot
 Rate any approved spot from **1 to 5** and leave a comment.
-Your username is automatically attached to your rating.
+Your username is automatically attached to the rating.
 
-### 8. List Ratings for a Spot
-View all user ratings and comments for any spot.
-The system shows the spot list first so you can find the correct ID.
+### 7. List Ratings for a Spot
+View all user ratings and comments for a selected spot.
 
-### 9. Show Full Summary for a Spot
-View everything about a spot in one screen:
-- Location and description
-- Best season
-- All ratings with usernames and comments
-- Calculated average rating
-- All available hotels with prices
-- Price range (lowest to highest)
+### 8. Show Full Summary for a Spot
+View everything about a spot in one screen — location, description, best season,
+all ratings with average score, and all hotels with room availability and pricing.
 
-### 10. Top Rated Spots
-Shows all spots ranked from highest to lowest average rating.
-Spots with no ratings appear at the bottom.
+### 9. View Available Rooms
+Select a spot to see all hotels nearby with a visual room availability bar
+showing how many rooms are currently free out of total capacity.
 
-### 11. Travel Cost Calculator
-Plan your trip budget:
+### 10. Book a Hotel
+Book a hotel directly through the system:
 1. Select a destination spot
-2. Choose a hotel from available options
+2. Choose a hotel from the available options
+3. Enter the number of rooms (cannot exceed available rooms)
+4. Enter the number of nights
+
+The booking request is sent directly to the hotel's manager for approval.
+You receive a booking ID and a full cost summary at the end.
+
+### 11. My Bookings
+View all your booking requests with their current status — Pending, Approved, or Rejected —
+along with the total cost for each booking.
+
+### 12. Top Rated Spots
+All spots ranked from highest to lowest average rating.
+
+### 13. Travel Cost Calculator
+Estimate your trip cost without making a booking:
+1. Select a spot and hotel
+2. Enter number of rooms
 3. Enter number of nights
-4. The system calculates your total accommodation cost
+4. The system calculates: **Price per room × Rooms × Nights = Total**
+
+### 14. Logout
+Ends your session and returns to the splash screen.
+
+---
+
+## Hotel Manager Panel
+
+Hotel Managers own and operate hotels in the system. They submit hotels for admin
+approval, manage room availability, and handle guest booking requests.
+
+### 1. List All Spots
+View all approved spots in the database.
+
+### 2. Search by City
+Search spots by city name.
+
+### 3. Search by Country
+Search spots by country name.
+
+### 4. List Ratings for a Spot
+View all user ratings for any spot.
+
+### 5. List Hotels for a Spot
+View all approved hotels near a selected spot, including room availability and manager details.
+
+### 6. Add New Hotel
+Submit a new hotel for admin approval. Provide:
+- The spot the hotel is located near
+- Hotel name and address
+- Price per room per night (BDT)
+- Total number of rooms
+
+The submission enters a pending queue. It does not appear in the live database
+until an admin approves it. Once approved, you become the manager of that hotel.
+
+### 7. My Hotels
+View all approved hotels under your management, with addresses, pricing, and current room availability.
+
+### 8. Available Seats — My Hotels
+See a visual room availability bar for each of your hotels showing
+available rooms out of total capacity.
+
+### 9. Booking Requests
+View all booking requests (Pending, Approved, and Rejected) for your hotels.
+Each entry shows the guest name, number of rooms, number of nights, total cost, and booking time.
+
+### 10. Approve / Reject a Booking
+Review pending booking requests and take action:
+
+- **Approve (A):** Confirms the booking. Available rooms are reduced by the number
+  of rooms requested. The system prevents approval if there are not enough rooms available.
+- **Reject (R):** Declines the booking. Room count is not affected.
+- **Cancel (0):** Return without taking action.
+
+### 11. Revenue Report
+Generates a full revenue summary across all your hotels. For each hotel, it shows:
+- Number of approved bookings
+- Total revenue from those bookings (Price × Rooms × Nights)
+- Grand total revenue across all your hotels combined
 
 ### 12. Logout
 Ends your session and returns to the splash screen.
@@ -143,110 +216,123 @@ Ends your session and returns to the splash screen.
 
 ## Admin Panel
 
-Admins have full control over the database, including approving content,
-managing users, and viewing system activity.
+Admins have full control over the database — approving content submitted by users
+and hotel managers, managing spots, and monitoring all system activity.
 
 ### 1. List All Spots
-Same as the user view — shows all approved spots.
+View all approved spots in the database.
 
 ### 2. Approve Pending Spots
-View all spot submissions waiting for review. For each pending spot you can:
+View all spot submissions from users waiting for review. For each entry:
 
-- **Approve (A):** Moves the spot from the pending queue into the live database.
-  The spot instantly becomes visible to all users.
-- **Disapprove (D):** Permanently removes the submission from the queue.
-  The submitting user's entry is discarded.
+- **Approve (A):** Moves the spot into the live database. Instantly visible to all users.
+- **Disapprove (D):** Permanently removes the submission.
 - **Cancel (0):** Return without taking action.
 
 ### 3. Approve Pending Hotels
-View all hotel submissions waiting for review. Same Approve / Disapprove / Cancel
-flow as spots.
+View all hotel submissions from Hotel Managers. Same Approve / Disapprove / Cancel flow.
 
-> If a hotel's linked spot was deleted while the hotel was still pending,
-> the system flags it with a warning. You cannot approve a hotel for a
-> spot that no longer exists — use Disapprove to clean it up.
+> If a hotel's linked spot was deleted while the hotel was still pending, the system
+> flags it with a warning. You cannot approve a hotel for a spot that no longer exists
+> — use Disapprove to clean it up.
+
+When a hotel is approved, the submitting Hotel Manager automatically becomes
+its manager and can start receiving bookings.
 
 ### 4. Delete a Spot (Cascade)
 Permanently delete a spot and **all data linked to it**:
 - The spot itself
 - All approved hotels for that spot
 - All ratings for that spot
+- All bookings associated with that spot
 - All pending hotel submissions for that spot
 
 You must type `YES` (uppercase) to confirm. This action cannot be undone.
-The cascade ensures no orphaned data remains after deletion.
 
 ### 5. View All Registered Users
-Displays a table of all user accounts with their ID, username, and role.
-Passwords are never shown — only their secure hashes are stored.
+Displays all user accounts with their ID, username, and role.
+Password hashes are never shown.
 
 ### 6. View Audit Log
-Every significant action in the system is recorded with:
-- Timestamp
-- Who performed the action
-- What the action was
-- What it targeted
-
-Actions logged include: logins, logouts, signups, spot/hotel submissions,
-approvals, disapprovals, deletions, cost calculations, report exports,
-and force exits via Ctrl+C.
+Every significant action in the system is recorded with a timestamp, actor, action type,
+and target. Actions logged include: logins, logouts, signups, spot and hotel submissions,
+approvals, disapprovals, deletions, bookings, cost calculations, revenue views,
+report exports, and force exits via Ctrl+C.
 
 ### 7. Average Ratings for All Spots
-Displays a table showing every spot's average rating and total number of reviews.
-Spots with no ratings show N/A.
+A table showing every spot's average rating and total review count.
 
 ### 8. Show Full Summary for a Spot
-Same detailed view as the user version — location, season, all ratings,
-average score, and all hotels with prices.
+Complete view of a spot — location, season, all ratings with average, and all hotels with pricing.
 
 ### 9. Top Rated Spots
-Spots ranked by average rating, highest first.
+All spots ranked by average rating from highest to lowest.
 
-### 10. Export Summary Report
-Generates a `summary_report.txt` file containing every spot's full details —
-description, all ratings with averages, and all hotels.
-Useful for printing or submitting as documentation.
+### 10. View All Bookings
+A full list of every booking in the system across all hotels and managers,
+showing guest, hotel, rooms, nights, total cost, manager, status, and timestamp.
 
-### 11. Logout
+### 11. Export Summary Report
+Generates `summary_report.txt` with every spot's full details including
+ratings, averages, and hotels. Useful for printing or archival.
+
+### 12. Logout
 Ends the admin session and returns to the splash screen.
 
 ---
 
 ## Database Files
 
-All data is stored as plain pipe-delimited text files in the project folder.
-You can open any of them with a text editor to inspect the raw data.
+All data is stored as plain pipe-delimited (`|`) text files in the project folder.
 
-| File | What it stores |
+| File | Schema |
 |---|---|
-| `users.txt` | UserID, Username, Password Hash, Role |
-| `spots.txt` | Approved travel spots |
-| `pending_spots.txt` | Spot submissions awaiting admin approval |
-| `hotels.txt` | Approved hotels linked to spots |
-| `pending_hotels.txt` | Hotel submissions awaiting admin approval |
-| `ratings.txt` | User ratings and comments per spot |
-| `audit_log.txt` | Full timestamped log of all system actions |
-| `summary_report.txt` | Generated when admin exports a report |
+| `users.txt` | UserID \| Username \| PasswordHash \| Role |
+| `spots.txt` | SpotID \| Name \| City \| Country \| Description \| BestSeason |
+| `pending_spots.txt` | SpotID \| Name \| City \| Country \| Description \| BestSeason \| SubmittedBy |
+| `hotels.txt` | HotelID \| SpotID \| HotelName \| Address \| PricePerNight \| TotalRooms \| AvailableRooms \| ManagerUsername |
+| `pending_hotels.txt` | HotelID \| SpotID \| HotelName \| Address \| PricePerNight \| TotalRooms \| SubmittedBy |
+| `ratings.txt` | SpotID \| Username \| Rating \| Comment |
+| `bookings.txt` | BookingID \| Username \| HotelID \| HotelName \| SpotID \| Rooms \| Nights \| Status \| Timestamp |
+| `audit_log.txt` | Timestamp \| Actor \| Action \| TargetID |
+| `summary_report.txt` | Generated on demand by admin export |
+
+---
+
+## Booking Cost Formula
+
+All cost calculations across the system use the same formula:
+
+```
+Total Cost = Price per Room per Night × Number of Rooms × Number of Nights
+```
+
+This applies to the booking flow, the travel cost calculator, the revenue report,
+and the booking history view.
 
 ---
 
 ## Safety Features
 
-**Password security:** Passwords are hashed with SHA-256 before storage.
-The original password is never saved anywhere.
+**Password security:** Passwords are hashed with SHA-256 via `sha256sum` before storage.
+The original password is never saved anywhere in the system.
 
 **Input sanitization:** The pipe character `|` is stripped from all user input
-to prevent data corruption since `|` is used as the column separator.
+to prevent delimiter injection since `|` is the column separator in all database files.
+
+**Room availability enforcement:** The booking system checks available rooms in real time
+and prevents users from requesting more rooms than are currently free.
+The hotel manager approval step also re-checks availability before confirming.
 
 **Atomic writes:** When approving content, the system writes to the live file first,
-confirms the write succeeded, and only then removes it from the pending queue.
-This prevents data loss if something goes wrong mid-operation.
+confirms the write succeeded, and only then removes the entry from the pending queue.
+This prevents data loss if an operation fails mid-execution.
 
-**Cascade delete:** Deleting a spot automatically removes all linked hotels,
-ratings, and pending hotel submissions — no orphaned data is left behind.
+**Cascade delete:** Deleting a spot automatically removes all linked hotels, ratings,
+pending hotel submissions, and bookings — no orphaned data is left behind.
 
-**Graceful exit:** Pressing `Ctrl+C` at any point logs the interruption to the
-audit trail, clears the session, and exits cleanly without corrupting any files.
+**Graceful exit:** Pressing `Ctrl+C` at any point logs the interruption to the audit trail,
+clears the session, and exits cleanly without corrupting any files.
 
 ---
 
@@ -259,6 +345,9 @@ wsl --install
 # Open WSL, then clone and run
 git clone https://github.com/shirsho009/travel-spot-manager.git
 cd travel-spot-manager
-chmod +x travel_manager.sh
+chmod +x travel_manager.sh lib/init.sh lib/auth.sh lib/shared.sh lib/user.sh lib/hotel_manager.sh lib/admin.sh
 ./travel_manager.sh
+```
+
+Everything works identically on WSL as it does on Mac/OrbStack.
 ```
